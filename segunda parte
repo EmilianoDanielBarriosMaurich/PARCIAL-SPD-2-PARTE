@@ -1,0 +1,285 @@
+//Emiliano Daniel Barrio Maurich 1B
+//PARTE 2° PARCIAL
+
+#define LED_A 9
+#define LED_B 10
+#define LED_C 13
+#define LED_D 12
+#define LED_E 11
+#define LED_G 7
+#define LED_F 8
+#define MOTOR 5
+#define SENSOR_FUERZA A0
+#define UNIDAD A5
+#define DECENA A4
+#define SWITCH 6
+#define APAGADOS 0
+
+int contador = 0;
+int contador_primos = 0;
+int fuerzaLeida = 0;
+int fuerza = 0;
+
+void setup()
+{
+  pinMode(LED_A, OUTPUT);
+  pinMode(LED_B, OUTPUT);
+  pinMode(LED_C, OUTPUT);
+  pinMode(LED_D, OUTPUT);
+  pinMode(LED_E, OUTPUT);
+  pinMode(LED_F, OUTPUT);
+  pinMode(LED_G, OUTPUT);
+  pinMode(UNIDAD, OUTPUT);
+  pinMode(DECENA, OUTPUT);
+  pinMode(MOTOR, OUTPUT);
+  pinMode(SWITCH, INPUT);
+  Serial.begin(9600);
+}
+
+void loop()
+{
+  if(digitalRead(SWITCH) == LOW)//SI EL INTERRUPTOR DESLIZANTE ESTA PARA LA DERECHA EL CONTADOR AUMENTA DE UNO EN UNO HASTA LLEGAR AL 99. CUANDO LLEGA AL 99 RETROCEDE HASTA VOLVER AL 0.
+  {
+    contador_primos = 0;//CUANDO EL INTERRUPTOR CAMBIA DE POSICION EL CONTADOR CONTRARIO SE REINICIA EN 0.
+    
+    prenderContador(contador, 500);  
+
+    contador++;
+    
+    if(contador > 99)
+    {
+      digitalWrite(MOTOR, HIGH);//CUANDO EL CONTADOR RETROCEDE SE ENCIENDE EL MOTOR HASTA QUE ESTE LLEGUE A 0.
+      contador = contar_reversa(contador);
+    } 
+    else
+    {
+      digitalWrite(MOTOR, LOW);
+    }
+  }
+  if(digitalRead(SWITCH) == HIGH)//SI EL INTERRUPTOR DESLIZANTE ESTA PARA LA IZQUIERDA EL CONTADOR FUNCIONA COMO CONTADOR DE NUMEROS PRIMOS. CUANDO LLEGA AL 97 RETROCEDE HASTA VOLVER AL 0.
+  {  
+    contador = 0;  
+    
+    contador_primos = generar_primos_mas(contador_primos);
+    
+    prenderContador(contador_primos, 500);
+    
+    contador_primos++;
+    if(contador_primos > 97)
+    {
+      digitalWrite(MOTOR, HIGH);
+      contador_primos = contar_reversa(contador_primos);
+    }
+    else
+    {
+      digitalWrite(MOTOR, LOW);
+    }
+  }
+  
+  fuerzaLeida = analogRead(SENSOR_FUERZA);
+  fuerza = map(fuerzaLeida, 0, 912, 0, 10);
+  Serial.println(fuerza);   
+}
+
+void prenderNumero(int numero)
+{
+  digitalWrite(LED_A, LOW);
+  digitalWrite(LED_B, LOW);
+  digitalWrite(LED_C, LOW);
+  digitalWrite(LED_D, LOW);
+  digitalWrite(LED_E, LOW);
+  digitalWrite(LED_F, LOW);
+  digitalWrite(LED_G, LOW);
+  
+  switch(numero)
+  {
+    case(0):
+    {
+      digitalWrite(LED_A, HIGH);
+      digitalWrite(LED_B, HIGH);
+      digitalWrite(LED_C, HIGH);
+      digitalWrite(LED_D, HIGH);
+      digitalWrite(LED_E, HIGH);
+      digitalWrite(LED_F, HIGH);
+      break;
+    }
+    case(1):
+    {
+      digitalWrite(LED_B, HIGH);
+  	  digitalWrite(LED_C, HIGH);
+      break;
+    }
+    case(2):
+    {
+      digitalWrite(LED_A, HIGH);
+      digitalWrite(LED_B, HIGH);
+      digitalWrite(LED_D, HIGH);
+      digitalWrite(LED_E, HIGH);
+      digitalWrite(LED_G, HIGH);
+      break;
+    }
+    case(3):
+    {
+      digitalWrite(LED_A, HIGH);
+      digitalWrite(LED_B, HIGH);
+      digitalWrite(LED_C, HIGH);
+      digitalWrite(LED_D, HIGH);
+      digitalWrite(LED_G, HIGH);
+      break;
+    }
+    case(4):
+    {
+      digitalWrite(LED_B, HIGH);
+      digitalWrite(LED_C, HIGH);
+      digitalWrite(LED_F, HIGH);
+      digitalWrite(LED_G, HIGH);
+      break;
+    }
+    case(5):
+    {
+      digitalWrite(LED_A, HIGH);
+      digitalWrite(LED_C, HIGH);
+      digitalWrite(LED_D, HIGH);
+      digitalWrite(LED_F, HIGH);
+      digitalWrite(LED_G, HIGH);
+      break;
+    }
+    case(6):
+    {
+      digitalWrite(LED_A, HIGH);
+      digitalWrite(LED_C, HIGH);
+      digitalWrite(LED_D, HIGH);
+      digitalWrite(LED_E, HIGH);
+      digitalWrite(LED_F, HIGH);
+      digitalWrite(LED_G, HIGH); 
+      break;
+    }
+    case(7):
+    {
+      digitalWrite(LED_A, HIGH);
+      digitalWrite(LED_B, HIGH);
+      digitalWrite(LED_C, HIGH);
+      break;
+    }
+    case(8):
+    {
+      digitalWrite(LED_A, HIGH);
+      digitalWrite(LED_B, HIGH);
+      digitalWrite(LED_C, HIGH);
+      digitalWrite(LED_D, HIGH);
+      digitalWrite(LED_E, HIGH);
+      digitalWrite(LED_F, HIGH);
+      digitalWrite(LED_G, HIGH);
+      break;
+    }
+    case(9):
+    {
+      digitalWrite(LED_A, HIGH);
+      digitalWrite(LED_B, HIGH);
+      digitalWrite(LED_C, HIGH);
+      digitalWrite(LED_D, HIGH);
+      digitalWrite(LED_F, HIGH);
+      digitalWrite(LED_G, HIGH);
+      break;
+    }
+  }
+}
+
+void prenderContador(int numero, int delay)
+{ 
+  bool flag = "True";
+  int cantidad = delay/20;
+  while (flag = "True")
+  {
+    prender_Uni_Dec(APAGADOS);
+    prenderNumero(numero/10);
+    prender_Uni_Dec(DECENA);
+    prender_Uni_Dec(APAGADOS);
+    prenderNumero(numero - 10*((int)numero/10));
+    prender_Uni_Dec(UNIDAD);  
+    cantidad --;
+    if(cantidad == 0)
+    {
+      break;
+    }
+  }
+}
+  
+  
+void prender_Uni_Dec(int digito)
+{
+  if(digito == UNIDAD)
+  {
+    digitalWrite(UNIDAD, LOW);
+    digitalWrite(DECENA, HIGH);
+    delay(10);
+  }
+  else if(digito == DECENA)
+  {
+    digitalWrite(DECENA, LOW);
+    digitalWrite(UNIDAD, HIGH);
+    delay(10);
+  }
+  else
+  {
+    digitalWrite(DECENA, HIGH);
+    digitalWrite(UNIDAD, HIGH);
+  }
+}
+
+int calcular_primos(int numero)//CALCULA SI EL NUMERO QUE RECIBE POR PARAMETRO ES O NO PRIMO. SI ES PRIMO DEVUELVE UN 0, SINO DEVUELVE UN 1.
+{
+  int es_primo = 0;
+  
+  if(numero == 1 || numero == 0)
+  {
+    es_primo = 1;
+  }
+  if(numero != 2 && numero%2 == 0)  
+  {
+    es_primo = 1;
+  }
+  if(numero != 3 && numero%3 == 0)  
+  {
+    es_primo = 1;
+  }
+  if(numero != 5 && numero%5 == 0)  
+  {
+    es_primo = 1;
+  }
+  if(numero != 7 && numero%7 == 0)  
+  {
+    es_primo = 1;
+  }
+  return es_primo;
+}
+
+int generar_primos_mas(int contador)//LA FUNCION RECIBE POR PARAMETRO UN NUMERO Y DEVUELVE EL SEGUIENTE NUMERO QUE SEA PRIMO. SI EL NUMERO QUE RECIBIO ES PRIMO DEVUELVE EL MISMO.
+{
+  bool flag = "True";
+  
+  while (flag = "True")
+  {
+    if(calcular_primos(contador) == 0)
+    {
+      break;
+    }
+    else
+    {
+      contador ++;
+    }
+  }
+  return contador;
+}
+
+int contar_reversa(int contador)//LA FUNCION RECIBE UN NUMERO Y COMIENZA UNA CUENTA REGRESIVA DESDE ESE NUMERO HASTA LLEGAR AL 0. MUESTRA LA CUENTA POR LOS DISPLAY.
+{
+  while (contador > 0)
+  {
+    contador--;
+    prenderContador(contador, 100);
+  }
+  return contador;
+}
+  
+  
